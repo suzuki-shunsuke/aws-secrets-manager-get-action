@@ -1,0 +1,8 @@
+{
+  extends: [
+    "config:recommended",
+    "helpers:pinGitHubActionDigests",
+    "github>suzuki-shunsuke/renovate-config#2.2.0",
+    "github>suzuki-shunsuke/renovate-config:nolimit#2.2.0",
+  ],
+}
