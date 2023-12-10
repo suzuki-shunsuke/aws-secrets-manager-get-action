@@ -51428,7 +51428,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.run = void 0;
+exports.parseInputSecrets = exports.parseInputSecret = exports.parseInputSecretValue = exports.run = exports.parseSecretStringJSON = void 0;
 const client_secrets_manager_1 = __nccwpck_require__(39600);
 const core = __importStar(__nccwpck_require__(42186));
 const js_yaml_1 = __nccwpck_require__(21917);
@@ -51461,21 +51461,16 @@ const parseSecretStringJSON = (secretString) => {
     }
     return m;
 };
-const setSecrets = (secret, client, secrets) => __awaiter(void 0, void 0, void 0, function* () {
-    const command = new client_secrets_manager_1.GetSecretValueCommand({
-        SecretId: secret.secret_id,
-        VersionId: secret.version_id,
-        VersionStage: secret.version_stage,
-    });
-    const response = yield client.send(command);
-    if (response.SecretString === undefined) {
-        throw new Error("SecretString is required");
+exports.parseSecretStringJSON = parseSecretStringJSON;
+const setSecrets = (secret, secretString, secrets) => {
+    if (secretString === undefined) {
+        throw new Error("this action doesn't support binary secrets");
     }
     if (secret.values.length === 0) {
-        secrets.set(secret.output_name, response.SecretString);
+        secrets.set(secret.output_name, secretString);
         return;
     }
-    const secretMap = parseSecretStringJSON(response.SecretString);
+    const secretMap = (0, exports.parseSecretStringJSON)(secretString);
     for (const value of secret.values) {
         const secret = secretMap.get(value.output_name);
         if (secret === undefined) {
@@ -51483,13 +51478,19 @@ const setSecrets = (secret, client, secrets) => __awaiter(void 0, void 0, void 0
         }
         secrets.set(value.output_name, secret);
     }
-});
+};
 const run = (inputs) => __awaiter(void 0, void 0, void 0, function* () {
-    const inputSecrets = parseInputSecrets(inputs.secrets);
+    const inputSecrets = (0, exports.parseInputSecrets)(inputs.secrets);
     const client = new client_secrets_manager_1.SecretsManagerClient();
     const secrets = new Map;
     for (const elem of inputSecrets) {
-        yield setSecrets(elem, client, secrets);
+        const command = new client_secrets_manager_1.GetSecretValueCommand({
+            SecretId: elem.secret_id,
+            VersionId: elem.version_id,
+            VersionStage: elem.version_stage,
+        });
+        const response = yield client.send(command);
+        setSecrets(elem, response.SecretString, secrets);
     }
     for (const [key, value] of secrets) {
         core.setSecret(value);
@@ -51533,6 +51534,7 @@ const parseInputSecretValue = (value) => {
         output_name: record.output_name,
     };
 };
+exports.parseInputSecretValue = parseInputSecretValue;
 const parseInputSecret = (obj) => {
     for (const key of Object.keys(obj)) {
         if (!allowedFields.has(key)) {
@@ -51569,6 +51571,9 @@ const parseInputSecret = (obj) => {
         }
         secret.output_name = record.output_name;
     }
+    else if (record.values === undefined) {
+        secret.output_name = record.secret_id;
+    }
     if (record.values === undefined) {
         return secret;
     }
@@ -51576,10 +51581,11 @@ const parseInputSecret = (obj) => {
         throw new Error("values must be an Array");
     }
     for (const value of record.values) {
-        secret.values.push(parseInputSecretValue(value));
+        secret.values.push((0, exports.parseInputSecretValue)(value));
     }
     return secret;
 };
+exports.parseInputSecret = parseInputSecret;
 const parseInputSecrets = (secretsYAML) => {
     const data = (0, js_yaml_1.load)(secretsYAML);
     if (!Array.isArray(data)) {
@@ -51590,10 +51596,11 @@ const parseInputSecrets = (secretsYAML) => {
     }
     const secrets = [];
     for (const elem of data) {
-        secrets.push(parseInputSecret(elem));
+        secrets.push((0, exports.parseInputSecret)(elem));
     }
     return secrets;
 };
+exports.parseInputSecrets = parseInputSecrets;
 
 
 /***/ }),
