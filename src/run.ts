@@ -167,6 +167,8 @@ export const parseInputSecret = (obj: object): Secret => {
       throw new Error("output_name must be a string");
     }
     secret.output_name = record.output_name;
+  } else if (record.values === undefined) {
+    secret.output_name = record.secret_id;
   }
 
   if (record.values === undefined) {
