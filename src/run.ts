@@ -194,43 +194,7 @@ const parseInputSecrets = (secretsYAML: string): Secret[] => {
   }
   const secrets: Secret[] = [];
   for (const elem of data) {
-    for (const key of Object.keys(elem)) {
-      if (!allowedFields.has(key)) {
-        throw new Error(`unknown field ${key}`);
-      }
-    }
-    if (elem.values !== undefined) {
-      if (!Array.isArray(elem.values)) {
-        throw new Error("values must be an Array");
-      }
-      for (const value of elem.values) {
-        for (const key of Object.keys(value)) {
-          if (!valuesKeys.has(key)) {
-            throw new Error(`unknown field ${key}`);
-          }
-        }
-        const rawSecret = JSON.parse(elem.SecretString);
-        if (typeof rawSecret !== "object") {
-          throw new Error("secret value must be an object");
-        }
-        if (typeof value.key !== "string") {
-          throw new Error("key must be a string");
-        }
-        const output_name = ((): string => {
-          if (value.output_name !== undefined) {
-            return value.key;
-          }
-          if (typeof value.output_name !== "string") {
-            throw new Error("key must be a string");
-          }
-          return value.output_name;
-        })();
-        const secret = rawSecret[value.key];
-        if (typeof secret !== "string") {
-          throw new Error("secret value must be a string");
-        }
-      }
-    }
+    secrets.push(parseInputSecret(elem));
   }
   return secrets;
 };
