@@ -1,5 +1,9 @@
 name: aws-secrets-manager-get-action
 description: Get secrets from AWS Secrets Manager and outputs them
+inputs:
+  secrets:
+    description: Secret settings
+    required: true
 runs:
   using: 'node20'
   main: 'dist/index.js'
