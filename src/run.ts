@@ -33,7 +33,7 @@ const valuesKeys = new Set([
   "key",
 ]);
 
-const parseSecretStringJSON = (secretString: string): Map<string, string> => {
+export const parseSecretStringJSON = (secretString: string): Map<string, string> => {
   const rawSecret: unknown = JSON.parse(secretString);
   if (typeof rawSecret !== "object") {
     throw new Error("secretString must be an object");
@@ -51,21 +51,15 @@ const parseSecretStringJSON = (secretString: string): Map<string, string> => {
   return m;
 };
 
-const setSecrets = async (secret: Secret, client: SecretsManagerClient, secrets: Map<string, string>): Promise<void> => {
-  const command = new GetSecretValueCommand({
-    SecretId: secret.secret_id,
-    VersionId: secret.version_id,
-    VersionStage: secret.version_stage,
-  });
-  const response = await client.send(command);
-  if (response.SecretString === undefined) {
-    throw new Error("SecretString is required");
+const setSecrets = (secret: Secret, secretString: string | undefined, secrets: Map<string, string>) => {
+  if (secretString === undefined) {
+    throw new Error("this action doesn't support binary secrets");
   }
   if (secret.values.length === 0) {
-    secrets.set(secret.output_name, response.SecretString);
+    secrets.set(secret.output_name, secretString);
     return;
   }
-  const secretMap = parseSecretStringJSON(response.SecretString);
+  const secretMap = parseSecretStringJSON(secretString);
   for (const value of secret.values) {
     const secret = secretMap.get(value.output_name);
     if (secret === undefined) {
@@ -80,7 +74,13 @@ export const run = async (inputs: Inputs): Promise<void> => {
   const client = new SecretsManagerClient();
   const secrets = new Map<string, string>;
   for (const elem of inputSecrets) {
-    await setSecrets(elem, client, secrets);
+    const command = new GetSecretValueCommand({
+      SecretId: elem.secret_id,
+      VersionId: elem.version_id,
+      VersionStage: elem.version_stage,
+    });
+    const response = await client.send(command);
+    setSecrets(elem, response.SecretString, secrets);
   }
   for (const [key, value] of secrets) {
     core.setSecret(value);
@@ -91,7 +91,7 @@ export const run = async (inputs: Inputs): Promise<void> => {
   core.setOutput("secrets", secretsJSON);
 }
 
-const parseInputSecretValue = (value: unknown): Value => {
+export const parseInputSecretValue = (value: unknown): Value => {
   if (typeof value !== "object") {
     throw new Error("value must be an object");
   }
@@ -127,7 +127,7 @@ const parseInputSecretValue = (value: unknown): Value => {
   };
 };
 
-const parseInputSecret = (obj: object): Secret => {
+export const parseInputSecret = (obj: object): Secret => {
   for (const key of Object.keys(obj)) {
     if (!allowedFields.has(key)) {
       throw new Error(`unknown field ${key}`);
@@ -182,7 +182,7 @@ const parseInputSecret = (obj: object): Secret => {
   return secret;
 };
 
-const parseInputSecrets = (secretsYAML: string): Secret[] => {
+export const parseInputSecrets = (secretsYAML: string): Secret[] => {
   const data: unknown = load(secretsYAML);
   if (!Array.isArray(data)) {
     throw new Error("secrets must be an Array");
