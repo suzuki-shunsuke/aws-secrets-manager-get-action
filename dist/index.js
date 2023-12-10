@@ -51549,8 +51549,6 @@ const parseInputSecret = (obj) => {
     const secret = {
         secret_id: record.secret_id,
         output_name: "",
-        version_id: "",
-        version_stage: "",
         values: [],
     };
     if (record.version_id !== undefined) {

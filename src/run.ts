@@ -9,8 +9,8 @@ type Inputs = {
 type Secret = {
   output_name: string;
   secret_id: string;
-  version_id: string;
-  version_stage: string;
+  version_id?: string;
+  version_stage?: string;
   values: Value[];
 }
 
@@ -145,8 +145,6 @@ const parseInputSecret = (obj: object): Secret => {
   const secret: Secret = {
     secret_id: record.secret_id,
     output_name: "",
-    version_id: "",
-    version_stage: "",
     values: [],
   };
 
