@@ -1,8 +1,12 @@
 name: aws-secrets-manager-get-action
+author: Shunsuke Suzuki
+branding:
+  icon: 'cloud'
+  color: 'orange'
 description: Get secrets from AWS Secrets Manager and outputs them
 inputs:
   secrets:
-    description: Secret settings
+    description: YAML string, which is a list of secret settings.
     required: true
 runs:
   using: 'node20'
