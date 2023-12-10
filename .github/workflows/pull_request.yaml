@@ -9,4 +9,5 @@ jobs:
       - uses: actions/setup-node@8f152de45cc393bb48ce5d89d36b731f54556e65 # v4.0.0
         with:
           node-version: '20.10.0'
+      - run: npm i
       - run: npx jest
