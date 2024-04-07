@@ -3,6 +3,6 @@
     "config:recommended",
     "helpers:pinGitHubActionDigests",
     "github>suzuki-shunsuke/renovate-config#2.4.0",
-    "github>suzuki-shunsuke/renovate-config:nolimit#2.3.0",
+    "github>suzuki-shunsuke/renovate-config:nolimit#2.4.0",
   ],
 }
