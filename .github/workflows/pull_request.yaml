@@ -11,6 +11,6 @@ jobs:
           persist-credentials: false
       - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6.1.0
         with:
-          node-version: '20.19.6'
+          node-version: '20.20.0'
       - run: npm i
       - run: npx jest
