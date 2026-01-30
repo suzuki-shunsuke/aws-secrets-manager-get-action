@@ -4,7 +4,7 @@
     "test": "jest"
   },
   "dependencies": {
-    "@actions/core": "2.0.2",
+    "@actions/core": "2.0.3",
     "@aws-sdk/client-secrets-manager": "^3.470.0",
     "js-yaml": "4.1.1"
   },
