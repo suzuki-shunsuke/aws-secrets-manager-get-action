@@ -13,4 +13,4 @@ jobs:
         with:
           node-version: '20.20.2'
       - run: npm i
-      - run: npx jest
+      - run: npm test
