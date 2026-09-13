@@ -36,7 +36,7 @@ outputs:
   secrets:
     description: |
       A JSON string of all the secrets, keyed by output name.
-      Pass it to a step with `env: ${{fromJSON(steps.<id>.outputs.secrets)}}`.
+      Pass it to a step's `env` with fromJSON of this output.
       Each secret is also output under its own output name, which the 'secrets'
       input decides, so those can't be declared here.
 runs:
