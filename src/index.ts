@@ -1,10 +1,10 @@
-import * as core from '@actions/core'
-import { run } from './run'
+import * as core from "@actions/core";
+import { run } from "./run";
 
-const main = async (): Promise<void> => {
-  await run({
-    secrets: core.getInput('secrets', { required: true }),
-  })
+try {
+  await run();
+} catch (error) {
+  core.setFailed(
+    error instanceof Error ? error.message : JSON.stringify(error),
+  );
 }
-
-main().catch((e) => core.setFailed(e instanceof Error ? e.message : JSON.stringify(e)))
