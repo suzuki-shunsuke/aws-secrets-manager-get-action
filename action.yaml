@@ -1,13 +1,44 @@
 name: aws-secrets-manager-get-action
 author: Shunsuke Suzuki
 branding:
-  icon: 'cloud'
-  color: 'orange'
+  icon: cloud
+  color: orange
 description: Get secrets from AWS Secrets Manager and outputs them
 inputs:
   secrets:
-    description: YAML string, which is a list of secret settings.
+    description: |
+      YAML string, which is a list of secret settings.
+      See the README for the fields each element takes.
     required: true
+  role_to_assume:
+    description: |
+      ARN of the AWS IAM role to assume with the GitHub OIDC token.
+      The job needs the permission `id-token: write`.
+      The credentials are kept inside this action and are never exported, so
+      later steps of the job can't see them.
+      Leave this unset to read credentials from AWS_ACCESS_KEY_ID,
+      AWS_SECRET_ACCESS_KEY and AWS_SESSION_TOKEN instead, which is what
+      aws-actions/configure-aws-credentials exports.
+      Those environment variables are the only other source. A profile in
+      ~/.aws/credentials, IMDS on a self-hosted EC2 runner and the credentials
+      of an ECS or EKS task aren't read, so run
+      aws-actions/configure-aws-credentials first to use any of them.
+    required: false
+  region:
+    description: |
+      The AWS region of the secrets, which is also the region of the STS
+      endpoint when 'role_to_assume' is set.
+      It can be omitted for a secret whose 'secret_id' is an ARN, which carries
+      the region. Otherwise it falls back to AWS_REGION or AWS_DEFAULT_REGION,
+      and the action fails when none of them says which region a secret is in.
+    required: false
+outputs:
+  secrets:
+    description: |
+      A JSON string of all the secrets, keyed by output name.
+      Pass it to a step's `env` with fromJSON of this output.
+      Each secret is also output under its own output name, which the 'secrets'
+      input decides, so those can't be declared here.
 runs:
-  using: 'node20'
-  main: 'dist/index.js'
+  using: node24
+  main: dist/index.js

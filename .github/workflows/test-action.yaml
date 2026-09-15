@@ -1,0 +1,17 @@
+# This is a dummy workflow file to test actions using actionlint.
+# This workflow is never run.
+name: test action (actionlint)
+on: workflow_call
+jobs:
+  actionlint-action:
+    timeout-minutes: 10
+    runs-on: ubuntu-24.04
+    permissions:
+      id-token: write
+    steps:
+      - uses: ./
+        with:
+          role_to_assume: arn:aws:iam::123456789012:role/dummy
+          region: us-east-1
+          secrets: |
+            - secret_id: dummy
