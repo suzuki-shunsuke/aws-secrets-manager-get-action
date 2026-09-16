@@ -11,7 +11,7 @@
     "@actions/core": "3.0.1",
     "@suzuki-shunsuke/actions-aws-oidc": "npm:@jsr/suzuki-shunsuke__actions-aws-oidc@^0.2.0",
     "aws4fetch": "^1.0.20",
-    "js-yaml": "5.4.1"
+    "js-yaml": "5.4.2"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",
