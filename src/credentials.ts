@@ -21,6 +21,11 @@ export type Inputs = {
    * sts.amazonaws.com, which works from anywhere in the aws partition.
    */
   region: string;
+  /**
+   * The role session name, which CloudTrail records on every call the session
+   * makes. See ./session_name.ts.
+   */
+  roleSessionName: string;
 };
 
 /**
@@ -68,6 +73,7 @@ export const newCredentials = (inputs: Inputs): CredentialsProvider => {
     ? oidcCredentials({
         roleArn: inputs.roleArn,
         region: inputs.region || undefined,
+        roleSessionName: inputs.roleSessionName,
       })
     : () => new Promise((resolve) => resolve(credentialsFromEnv()));
 
