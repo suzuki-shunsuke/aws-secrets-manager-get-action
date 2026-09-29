@@ -72,6 +72,23 @@ exports. Those environment variables are the only other source: a profile in
 `~/.aws/credentials`, IMDS on a self-hosted EC2 runner and the credentials of an ECS or EKS
 task aren't read, so run `aws-actions/configure-aws-credentials` first to use any of them.
 
+#### The role session name
+
+The session is named `gha-<run id>-<run attempt>`, for example `gha-17251230-1`. CloudTrail
+records the session name on every call the session makes, so a `GetSecretValue` event names the
+workflow run that read the secret.
+
+The owner and the repository are left out. AWS STS caps the name at 64 characters and rejects
+anything outside `[\w+=,.@-]`, so a slash can't separate the parts and a repository name would
+sometimes have to be truncated. A run id is unique across GitHub, and the
+`AssumeRoleWithWebIdentity` event that opened the session records the `sub` claim of the OIDC
+token, which names the repository. Joining the two events on the access key id of the session
+gets there.
+
+The name is not configurable. An IAM trust policy conditioning on `sts:RoleSessionName` has to
+match this shape, for example with `StringLike` and `gha-*`. Earlier versions of this action used
+`GitHubActions`, so a policy pinned to that value with `StringEquals` needs updating.
+
 ### `region`
 
 Optional. The AWS region of the secrets, which is also the region of the STS endpoint when

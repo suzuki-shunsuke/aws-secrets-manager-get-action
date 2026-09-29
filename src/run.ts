@@ -1,9 +1,11 @@
+import process from "node:process";
 import * as core from "@actions/core";
 import { newCredentials } from "./credentials";
 import { parseInputSecrets } from "./input";
 import { secretOutputs } from "./output";
 import { resolveRegion } from "./region";
 import { getSecretValue } from "./secretsmanager";
+import { roleSessionName } from "./session_name";
 
 /**
  * This function gets the secrets and outputs them.
@@ -18,12 +20,22 @@ export const run = async (): Promise<void> => {
   const region = core.getInput("region");
   const roleArn = core.getInput("role_to_assume");
 
+  // The session is named after the workflow run so that a CloudTrail
+  // GetSecretValue event says which run read the secret. See ./session_name.ts.
+  const sessionName = roleSessionName({
+    runId: process.env["GITHUB_RUN_ID"] ?? "",
+    runAttempt: process.env["GITHUB_RUN_ATTEMPT"] ?? "",
+  });
   if (roleArn) {
     core.info(
-      `assuming an AWS IAM role with the GitHub OIDC token: ${roleArn}`,
+      `assuming an AWS IAM role with the GitHub OIDC token: ${roleArn} (session name: ${sessionName})`,
     );
   }
-  const credentials = newCredentials({ roleArn, region });
+  const credentials = newCredentials({
+    roleArn,
+    region,
+    roleSessionName: sessionName,
+  });
 
   const outputs = new Map<string, string>();
   for (const secret of secrets) {

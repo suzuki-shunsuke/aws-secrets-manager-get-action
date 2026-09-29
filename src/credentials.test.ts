@@ -27,7 +27,13 @@ describe("newCredentials", () => {
     process.env.AWS_SECRET_ACCESS_KEY = "secret";
     process.env.AWS_SESSION_TOKEN = "token";
 
-    expect(await newCredentials({ roleArn: "", region: "" })()).toEqual({
+    expect(
+      await newCredentials({
+        roleArn: "",
+        region: "",
+        roleSessionName: "gha",
+      })(),
+    ).toEqual({
       accessKeyId: "AKIAEXAMPLE",
       secretAccessKey: "secret",
       sessionToken: "token",
@@ -36,7 +42,7 @@ describe("newCredentials", () => {
 
   it("fails when neither role_to_assume nor the environment variables are set", async () => {
     await expect(
-      newCredentials({ roleArn: "", region: "" })(),
+      newCredentials({ roleArn: "", region: "", roleSessionName: "gha" })(),
     ).rejects.toThrowError(
       "no AWS credentials: set the 'role_to_assume' input, or set AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY",
     );
@@ -58,6 +64,7 @@ describe("newCredentials", () => {
     const provider = newCredentials({
       roleArn: "arn:aws:iam::123456789012:role/example",
       region: "us-east-2",
+      roleSessionName: "gha-17251230-1",
     });
     expect(await provider()).toMatchObject({
       accessKeyId: "ASIAEXAMPLE",
@@ -71,5 +78,8 @@ describe("newCredentials", () => {
     expect(String(fetch.mock.calls[1][0])).toBe(
       "https://sts.us-east-2.amazonaws.com/",
     );
+    // fetch is typed with the URL alone, but the request init comes second.
+    const init = (fetch.mock.calls[1] as unknown[])[1] as RequestInit;
+    expect(String(init.body)).toContain("RoleSessionName=gha-17251230-1");
   });
 });
