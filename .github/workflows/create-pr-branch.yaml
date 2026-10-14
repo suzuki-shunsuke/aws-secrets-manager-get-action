@@ -13,12 +13,12 @@ on:
         required: true
 jobs:
   create-pr-branch:
-    uses: ./.github/workflows/wc-create-pr-branch.yaml
+    uses: suzuki-shunsuke/js-action-release-workflow/.github/workflows/release.yaml@89c0f9f455f977a280103a7f450573adac9d8cf6 # v0.0.1
     permissions:
       contents: write
       pull-requests: write
       issues: write
-      # wc-create-pr-branch.yaml requests id-token: write, and a called workflow
+      # js-action-release-workflow requests id-token: write, and a called workflow
       # can't be granted more than its caller has.
       id-token: write
     with:
